@@ -6,8 +6,8 @@ import { ReservationList } from "./ReservationList";
 
 interface Reservation {
   id: string;
-  start: string; // ISO string
-  end: string; // ISO string
+  start: string;
+  end: string;
   room: {
     id: string;
     name: string;
