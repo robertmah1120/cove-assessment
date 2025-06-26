@@ -1,42 +1,88 @@
-import './App.css';
-import { DatePicker } from './DatePicker';
-import { DropDownSelect } from './DropDownSelect';
-import { ReservationList } from './ReservationList';
+import "./App.css";
+import { useEffect, useMemo, useState } from "react";
+import { DatePicker } from "./DatePicker";
+import { DropDownSelect } from "./DropDownSelect";
+import { ReservationList } from "./ReservationList";
+
+interface Reservation {
+  id: string;
+  start: string; // ISO string
+  end: string; // ISO string
+  room: {
+    id: string;
+    name: string;
+    imageUrl: string;
+  };
+}
+
+const RESERVATION_API =
+  "https://cove-coding-challenge-api.herokuapp.com/reservations";
 
 const App = () => {
-  // TODO: fetch reservations from the API
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+
+  useEffect(() => {
+    fetch(RESERVATION_API)
+      .then((res) => res.json())
+      .then((data) => {
+        setReservations(data);
+        if (data.length > 0 && !selectedRoomId) {
+          setSelectedRoomId(data[0].room.id);
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const roomOptions = useMemo(() => {
+    const seen = new Map<string, { value: string; name: string }>();
+    reservations.forEach((r) => {
+      if (!seen.has(r.room.id)) {
+        seen.set(r.room.id, { value: r.room.id, name: r.room.name });
+      }
+    });
+    return Array.from(seen.values());
+  }, [reservations]);
+
+  const filteredReservations = useMemo(() => {
+    return reservations.filter((r) => {
+      if (selectedRoomId && r.room.id !== selectedRoomId) return false;
+      const startDate = new Date(r.start);
+      return (
+        startDate.getFullYear() === selectedDate.getFullYear() &&
+        startDate.getMonth() === selectedDate.getMonth() &&
+        startDate.getDate() === selectedDate.getDate()
+      );
+    });
+  }, [reservations, selectedRoomId, selectedDate]);
 
   return (
     <div className="app">
       <div className="app-filters">
         <div className="app-filter-item">
-          {/* TODO: keep track of state */}
           <DatePicker
-            value={new Date()}
-            onChange={(newDate) => console.log(newDate)}
+            value={selectedDate}
+            onChange={(date) => {
+              if (date) setSelectedDate(date);
+            }}
           />
         </div>
         <div className="app-filter-item">
-          {/* TODO: populate options with rooms from the API */}
-          {/* TODO: keep track of state */}
           <DropDownSelect
-            value="room-a"
-            onChange={(newRoom) => console.log(newRoom)}
-            options={[
-              { value: "room-a", name: "Room A" },
-              { value: "room-b", name: "Room B" },
-            ]}
+            value={selectedRoomId}
+            onChange={setSelectedRoomId}
+            options={roomOptions}
           />
         </div>
       </div>
       <div className="app-reservations">
-        {/* TODO: pass filtered reservations here */}
         <ReservationList
-          reservations={[
-            { start: new Date(), end: new Date(), room: "room-b" },
-            { start: new Date(), end: new Date(), room: "room-a" },
-            { start: new Date(), end: new Date(), room: "room-b" },
-          ]}
+          reservations={filteredReservations.map((r) => ({
+            start: new Date(r.start),
+            end: new Date(r.end),
+            room: r.room,
+          }))}
         />
       </div>
     </div>

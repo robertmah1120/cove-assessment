@@ -57,7 +57,7 @@ Users should be able to change the filter values and see only the reservations t
 
 ### Approach
 
-**TODO:** Explain your approach here.
+State for the selected date and room is managed in the main `App` component using React's `useState`. Reservations are fetched from the API on mount. Room options are dynamically extracted from the fetched data. Filtering is performed using `useMemo` to optimize re-renders, and the filtered reservations are passed to the `ReservationList` component. The `DatePicker` and `DropDownSelect` components are controlled by the state.
 
 ---
 
@@ -90,7 +90,7 @@ Mobile:
 
 ### Approach
 
-**TODO:** Explain your approach here.
+Responsive design is implemented using CSS media queries in `App.css` to match the provided desktop and mobile mockups. The reservation list is styled with modern, clean UI elements, using flex layouts and spacing for clarity. The design adapts to smaller screens by stacking elements vertically and reducing padding.
 
 ---
 
@@ -119,7 +119,7 @@ Mobile:
 
 ### Approach
 
-**TODO:** Explain your approach here.
+The `isScheduleConflict` utility sorts reservations by start time and checks for any overlapping intervals, excluding cases where reservations only touch at endpoints. Comprehensive tests are added to cover empty, single, non-overlapping, overlapping, and edge-touching scenarios, ensuring correctness and maintainability.
 
 ---
 
